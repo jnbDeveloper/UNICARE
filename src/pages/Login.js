@@ -1,5 +1,5 @@
 import React from "react";
 
 export default function Login() {
-  return <div>This is unicare application</div>;
+  return <div>This is the login</div>;
 }
