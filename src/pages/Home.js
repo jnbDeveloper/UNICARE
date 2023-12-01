@@ -10,9 +10,9 @@ import {
   Grid,
   Typography,
   Switch,
-  LineChart,
   useTheme,
 } from "@mui/material";
+import { LineChart } from "@mui/x-charts";
 
 import "@fontsource/cabin/400.css";
 import "@fontsource/cabin/600.css";
@@ -144,7 +144,6 @@ export default function Home() {
         <Card>
           <CardContent sx={{ paddingBottom: "16px !important" }}>
             <Typography>Patients - Faculty Wise</Typography>
-            <br />
             <LineChart
               {...lineChartsParams}
               xAxis={[
