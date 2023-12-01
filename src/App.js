@@ -1,8 +1,8 @@
 import React from "react";
-import { ThemeProvider, createTheme } from "@mui/material";
+import { ThemeProvider } from "@mui/material";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import { lightTheme, darkTheme } from "./theme/Theme";
+import { lightTheme } from "./theme/Theme";
 import Login from "./pages/Login";
 import NavigationDrawer from "./pages/NavigationDrawer";
 

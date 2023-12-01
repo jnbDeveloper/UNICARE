@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
-  Container,
-  Box,
   TextField,
   Button,
   Card,
@@ -96,7 +94,7 @@ export default function Login() {
                   alignItems: "center",
                 }}
               >
-                <img src="logo192.png" style={{ width: "50px" }} />
+                <img src="logo192.png" alt="Logo" style={{ width: "50px" }} />
                 <Typography
                   variant="h4"
                   fontFamily="Cabin"

@@ -55,6 +55,7 @@ export const lightTheme = createTheme({
     },
   },
   link: "#198aff",
+  selectedMenu: "rgba(15, 112, 41, 0.1)",
 });
 
 export const darkTheme = createTheme({

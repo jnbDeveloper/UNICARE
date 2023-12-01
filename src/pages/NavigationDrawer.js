@@ -16,6 +16,8 @@ import {
   ListItemText,
   Avatar,
   Badge,
+  Tooltip,
+  Popover,
   colors,
   styled,
   useTheme,
@@ -23,9 +25,6 @@ import {
 
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import HomeIcon from "@mui/icons-material/Home";
@@ -34,13 +33,53 @@ import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
 import NoteAltIcon from "@mui/icons-material/NoteAlt";
+import SettingsIcon from "@mui/icons-material/Settings";
+import SummarizeIcon from "@mui/icons-material/Summarize";
 
-import BannerSmall from "../assets/images/BannerSmall.png";
+import Home from "./Home";
+import Appointments from "./Appointments";
 
 import "@fontsource/cabin/600.css";
 
 const drawerWidth = 240;
+const menu = [
+  "Home",
+  "Appointments",
+  "Check Patient",
+  "Health Records",
+  "Medicine Store",
+  "Medicals",
+  "Analysis",
+  "Settings",
+];
 
+// app bar style
+const AppBar = styled(MuiAppBar, {
+  shouldForwardProp: (prop) => prop !== "open",
+})(({ theme, open }) => ({
+  transition: theme.transitions.create(["margin", "width"], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  ...(open && {
+    width: `calc(100% - ${drawerWidth}px)`,
+    marginLeft: `${drawerWidth}px`,
+    transition: theme.transitions.create(["margin", "width"], {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  }),
+}));
+
+// header style
+const DrawerHeader = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  padding: "20px 12px",
+  justifyContent: "space-between",
+}));
+
+// container style
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
   ({ theme, open }) => ({
     flexGrow: 1,
@@ -60,45 +99,55 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
   })
 );
 
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
-  transition: theme.transitions.create(["margin", "width"], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: `${drawerWidth}px`,
-    transition: theme.transitions.create(["margin", "width"], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
-}));
-
-const DrawerHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  padding: "20px 12px",
-  justifyContent: "space-between",
-}));
-
 export default function NavigationDrawer() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+  const [selectedMenu, setSelectedMenu] = React.useState(0);
+  const [content, setContent] = React.useState(<Home />);
+  const [anchorEl, setAnchorEl] = React.useState(null);
 
+  // open the drawer
   const handleDrawerOpen = () => {
     setOpen(true);
   };
 
+  // close the drawer
   const handleDrawerClose = () => {
     setOpen(false);
   };
 
+  // drawer menu item click handle
+  const handleMenuSelection = (index) => {
+    setSelectedMenu(index);
+    switch (index) {
+      case 0:
+        setContent(<Home />);
+        break;
+      case 1:
+        setContent(<Appointments />);
+        break;
+      default:
+        break;
+    }
+  };
+
+  // open messages popover
+  const handleMessagesClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  // close messages popover
+  const handleMessagesClose = () => {
+    setAnchorEl(null);
+  };
+
+  const openMessages = Boolean(anchorEl);
+  const id = open ? "simple-popover" : undefined;
+
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
+
       <AppBar position="fixed" open={open}>
         <Toolbar
           sx={{
@@ -107,7 +156,7 @@ export default function NavigationDrawer() {
             alignItems: "center",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center" }}>
+          <Box style={{ display: "flex", alignItems: "center" }}>
             <IconButton
               color="inherit"
               aria-label="open drawer"
@@ -118,25 +167,53 @@ export default function NavigationDrawer() {
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" noWrap component="div">
-              Home
+              {menu[selectedMenu]}
             </Typography>
-          </div>
-          <div
+          </Box>
+          <Box
             style={{
               display: "flex",
               alignItems: "center",
               marginLeft: "30px",
             }}
           >
-            <Badge badgeContent={4} color="secondary">
-              <MailOutlineIcon color="action" />
-            </Badge>
-            <Badge badgeContent={4} color="secondary" sx={{ ml: 2 }}>
-              <NotificationsNoneIcon color="action" />
-            </Badge>
+            <IconButton
+              area-aria-describedby={id}
+              onClick={handleMessagesClick}
+            >
+              <Tooltip title="Messages" placement="bottom">
+                <Badge badgeContent={0} color="secondary">
+                  <MailOutlineIcon color="action" />
+                </Badge>
+              </Tooltip>
+            </IconButton>
+            <Popover
+              id={id}
+              open={openMessages}
+              anchorEl={anchorEl}
+              onClose={handleMessagesClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+            >
+              <Typography sx={{ p: 2 }}>The content of the Popover.</Typography>
+              <Divider />
+              <Typography sx={{ p: 2 }}>No new messages.</Typography>
+            </Popover>
+
+            <Tooltip title="Notifications" placement="bottom">
+              <Badge badgeContent={4} color="secondary" sx={{ ml: 2 }}>
+                <NotificationsNoneIcon color="action" />
+              </Badge>
+            </Tooltip>
             <Avatar sx={{ bgcolor: colors.amber[300], ml: 3 }}>N</Avatar>
             <Typography sx={{ ml: 1 }}>Nayanajith Bandara</Typography>
-          </div>
+          </Box>
         </Toolbar>
       </AppBar>
 
@@ -154,17 +231,13 @@ export default function NavigationDrawer() {
         open={open}
       >
         <DrawerHeader>
-          <div style={{ display: "flex" }}>
+          <Box sx={{ display: "flex" }}>
             <img
               src="logo192.png"
+              alt="Logo"
               style={{ width: "40px", height: "40px", marginRight: "10px" }}
             />
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
               <Typography fontFamily="Cabin" letterSpacing="0.4rem">
                 UNICARE
               </Typography>
@@ -175,14 +248,10 @@ export default function NavigationDrawer() {
               >
                 EUSL SRI LANKA
               </Typography>
-            </div>
-          </div>
+            </Box>
+          </Box>
           <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "ltr" ? (
-              <ChevronLeftIcon />
-            ) : (
-              <ChevronRightIcon />
-            )}
+            <ChevronLeftIcon />
           </IconButton>
         </DrawerHeader>
 
@@ -190,7 +259,14 @@ export default function NavigationDrawer() {
 
         <List>
           <ListItem disablePadding>
-            <ListItemButton>
+            <ListItemButton
+              onClick={() => handleMenuSelection(0)}
+              sx={{
+                ...(selectedMenu === 0 && {
+                  backgroundColor: theme.selectedMenu,
+                }),
+              }}
+            >
               <ListItemIcon>
                 <HomeIcon />
               </ListItemIcon>
@@ -198,7 +274,14 @@ export default function NavigationDrawer() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton>
+            <ListItemButton
+              onClick={() => handleMenuSelection(1)}
+              sx={{
+                ...(selectedMenu === 1 && {
+                  backgroundColor: theme.selectedMenu,
+                }),
+              }}
+            >
               <ListItemIcon>
                 <SegmentIcon />
               </ListItemIcon>
@@ -206,7 +289,14 @@ export default function NavigationDrawer() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton>
+            <ListItemButton
+              onClick={() => handleMenuSelection(2)}
+              sx={{
+                ...(selectedMenu === 2 && {
+                  backgroundColor: theme.selectedMenu,
+                }),
+              }}
+            >
               <ListItemIcon>
                 <NoteAltIcon />
               </ListItemIcon>
@@ -214,7 +304,14 @@ export default function NavigationDrawer() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton>
+            <ListItemButton
+              onClick={() => handleMenuSelection(3)}
+              sx={{
+                ...(selectedMenu === 3 && {
+                  backgroundColor: theme.selectedMenu,
+                }),
+              }}
+            >
               <ListItemIcon>
                 <MonitorHeartIcon />
               </ListItemIcon>
@@ -222,7 +319,14 @@ export default function NavigationDrawer() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton>
+            <ListItemButton
+              onClick={() => handleMenuSelection(4)}
+              sx={{
+                ...(selectedMenu === 4 && {
+                  backgroundColor: theme.selectedMenu,
+                }),
+              }}
+            >
               <ListItemIcon>
                 <MedicalServicesIcon />
               </ListItemIcon>
@@ -230,46 +334,56 @@ export default function NavigationDrawer() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton>
+            <ListItemButton
+              onClick={() => handleMenuSelection(5)}
+              sx={{
+                ...(selectedMenu === 5 && {
+                  backgroundColor: theme.selectedMenu,
+                }),
+              }}
+            >
+              <ListItemIcon>
+                <SummarizeIcon />
+              </ListItemIcon>
+              <ListItemText primary="Medicals" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => handleMenuSelection(6)}
+              sx={{
+                ...(selectedMenu === 6 && {
+                  backgroundColor: theme.selectedMenu,
+                }),
+              }}
+            >
               <ListItemIcon>
                 <BarChartIcon />
               </ListItemIcon>
               <ListItemText primary="Analysis" />
             </ListItemButton>
           </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => handleMenuSelection(7)}
+              sx={{
+                ...(selectedMenu === 7 && {
+                  backgroundColor: theme.selectedMenu,
+                }),
+              }}
+            >
+              <ListItemIcon>
+                <SettingsIcon />
+              </ListItemIcon>
+              <ListItemText primary="Settings" />
+            </ListItemButton>
+          </ListItem>
         </List>
       </Drawer>
+
       <Main open={open}>
-        <div style={{ height: "60px" }} />
-        <Typography paragraph>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Rhoncus
-          dolor purus non enim praesent elementum facilisis leo vel. Risus at
-          ultrices mi tempus imperdiet. Semper risus in hendrerit gravida rutrum
-          quisque non tellus. Convallis convallis tellus id interdum velit
-          laoreet id donec ultrices. Odio morbi quis commodo odio aenean sed
-          adipiscing. Amet nisl suscipit adipiscing bibendum est ultricies
-          integer quis. Cursus euismod quis viverra nibh cras. Metus vulputate
-          eu scelerisque felis imperdiet proin fermentum leo. Mauris commodo
-          quis imperdiet massa tincidunt. Cras tincidunt lobortis feugiat
-          vivamus at augue. At augue eget arcu dictum varius duis at consectetur
-          lorem. Velit sed ullamcorper morbi tincidunt. Lorem donec massa sapien
-          faucibus et molestie ac.
-        </Typography>
-        <Typography paragraph>
-          Consequat mauris nunc congue nisi vitae suscipit. Fringilla est
-          ullamcorper eget nulla facilisi etiam dignissim diam. Pulvinar
-          elementum integer enim neque volutpat ac tincidunt. Ornare suspendisse
-          sed nisi lacus sed viverra tellus. Purus sit amet volutpat consequat
-          mauris. Elementum eu facilisis sed odio morbi. Euismod lacinia at quis
-          risus sed vulputate odio. Morbi tincidunt ornare massa eget egestas
-          purus viverra accumsan in. In hendrerit gravida rutrum quisque non
-          tellus orci ac. Pellentesque nec nam aliquam sem et tortor. Habitant
-          morbi tristique senectus et. Adipiscing elit duis tristique
-          sollicitudin nibh sit. Ornare aenean euismod elementum nisi quis
-          eleifend. Commodo viverra maecenas accumsan lacus vel facilisis. Nulla
-          posuere sollicitudin aliquam ultrices sagittis orci a.
-        </Typography>
+        <Box height="64px" />
+        {content}
       </Main>
     </Box>
   );
