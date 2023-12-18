@@ -1,4 +1,7 @@
+import "@fontsource/cabin/600.css";
+
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   Box,
@@ -18,6 +21,7 @@ import {
   Badge,
   Tooltip,
   Popover,
+  Button,
   colors,
   styled,
   useTheme,
@@ -25,8 +29,7 @@ import {
 
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
-import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import HomeIcon from "@mui/icons-material/Home";
 import SegmentIcon from "@mui/icons-material/Segment";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
@@ -35,11 +38,18 @@ import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
 import NoteAltIcon from "@mui/icons-material/NoteAlt";
 import SettingsIcon from "@mui/icons-material/Settings";
 import SummarizeIcon from "@mui/icons-material/Summarize";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import PersonIcon from "@mui/icons-material/Person";
+import LogoutIcon from "@mui/icons-material/Logout";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 import Home from "./Home";
 import Appointments from "./Appointments";
+import DoctorProfile from "./DoctorProfile";
+import CheckPatient from "./CheckPatient";
 
-import "@fontsource/cabin/600.css";
+import NotificationCard from "../../components/NotificationCard";
+import Settings from "./Settings";
 
 const drawerWidth = 240;
 const menu = [
@@ -51,12 +61,14 @@ const menu = [
   "Medicals",
   "Analysis",
   "Settings",
+  "Profile",
 ];
 
 // app bar style
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
 })(({ theme, open }) => ({
+  display: "block",
   transition: theme.transitions.create(["margin", "width"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
@@ -83,6 +95,20 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
   ({ theme, open }) => ({
     flexGrow: 1,
+    height: "100vh",
+    overflowY: "auto",
+    scrollbarWidth: "thin",
+    position: "relative",
+    "&::-webkit-scrollbar": {
+      width: "5px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: "transparent",
+      transition: "background-color 0.3s ease",
+    },
+    "&:hover::-webkit-scrollbar-thumb": {
+      backgroundColor: "rgba(128, 128, 128, 0.5)",
+    },
     padding: theme.spacing(3),
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.sharp,
@@ -101,10 +127,14 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
 
 export default function NavigationDrawer() {
   const theme = useTheme();
+  const navigate = useNavigate();
+
   const [open, setOpen] = React.useState(false);
   const [selectedMenu, setSelectedMenu] = React.useState(0);
   const [content, setContent] = React.useState(<Home />);
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorElNotifications, setAnchorElNotifications] =
+    React.useState(null);
+  const [anchorElProfile, setAnchorElProfile] = React.useState(null);
 
   // open the drawer
   const handleDrawerOpen = () => {
@@ -126,23 +156,57 @@ export default function NavigationDrawer() {
       case 1:
         setContent(<Appointments />);
         break;
+      case 2:
+        setContent(<CheckPatient />);
+        break;
+      case 7:
+        setContent(<Settings />);
+        break;
+      case 8:
+        setContent(<DoctorProfile />);
+        break;
       default:
         break;
     }
   };
 
-  // open messages popover
-  const handleMessagesClick = (event) => {
-    setAnchorEl(event.currentTarget);
+  // open popover
+  const handlePopoverOpen = (popover, event) => {
+    switch (popover) {
+      case 0:
+        setAnchorElNotifications(event.currentTarget);
+        break;
+      case 1:
+        setAnchorElProfile(event.currentTarget);
+        break;
+      default:
+        break;
+    }
   };
 
-  // close messages popover
-  const handleMessagesClose = () => {
-    setAnchorEl(null);
+  // close popover
+  const handlePopoverClose = (popover) => {
+    switch (popover) {
+      case 0:
+        setAnchorElNotifications(null);
+        break;
+      case 1:
+        setAnchorElProfile(null);
+        break;
+      default:
+        break;
+    }
   };
 
-  const openMessages = Boolean(anchorEl);
-  const id = open ? "simple-popover" : undefined;
+  const logout = () => {
+    navigate("/login");
+  };
+
+  const openNotifications = Boolean(anchorElNotifications);
+  const openProfile = Boolean(anchorElProfile);
+
+  const notificationId = openNotifications ? "notification-popover" : undefined;
+  const profileId = openProfile ? "profile-popover" : undefined;
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -178,20 +242,20 @@ export default function NavigationDrawer() {
             }}
           >
             <IconButton
-              area-aria-describedby={id}
-              onClick={handleMessagesClick}
+              area-aria-describedby={notificationId}
+              onClick={(event) => handlePopoverOpen(0, event)}
             >
-              <Tooltip title="Messages" placement="bottom">
-                <Badge badgeContent={0} color="secondary">
-                  <MailOutlineIcon color="action" />
+              <Tooltip title="Notifications" placement="bottom">
+                <Badge badgeContent={4} color="secondary">
+                  <NotificationsIcon sx={{ color: "white" }} />
                 </Badge>
               </Tooltip>
             </IconButton>
             <Popover
-              id={id}
-              open={openMessages}
-              anchorEl={anchorEl}
-              onClose={handleMessagesClose}
+              id={notificationId}
+              open={openNotifications}
+              anchorEl={anchorElNotifications}
+              onClose={() => handlePopoverClose(0)}
               anchorOrigin={{
                 vertical: "bottom",
                 horizontal: "right",
@@ -201,18 +265,101 @@ export default function NavigationDrawer() {
                 horizontal: "right",
               }}
             >
-              <Typography sx={{ p: 2 }}>The content of the Popover.</Typography>
-              <Divider />
-              <Typography sx={{ p: 2 }}>No new messages.</Typography>
+              <List>
+                <ListItem sx={{ padding: 0 }}>
+                  <NotificationCard />
+                </ListItem>
+                <Divider />
+                <ListItem sx={{ padding: 0 }}>
+                  <NotificationCard />
+                </ListItem>
+              </List>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                ml={2}
+                mb={1}
+                mr={2}
+              >
+                <Button variant="text">View All</Button>
+                <IconButton>
+                  <DeleteIcon />
+                </IconButton>
+              </Box>
+              <Typography sx={{ p: 2 }} display="none">
+                No new notifications
+              </Typography>
             </Popover>
 
-            <Tooltip title="Notifications" placement="bottom">
-              <Badge badgeContent={4} color="secondary" sx={{ ml: 2 }}>
-                <NotificationsNoneIcon color="action" />
-              </Badge>
-            </Tooltip>
-            <Avatar sx={{ bgcolor: colors.amber[300], ml: 3 }}>N</Avatar>
-            <Typography sx={{ ml: 1 }}>Nayanajith Bandara</Typography>
+            <Avatar
+              sx={{ bgcolor: colors.amber[300], ml: 3 }}
+              src="../../profile2.png"
+            ></Avatar>
+            <Typography
+              sx={{
+                ml: 1,
+                display: "-webkit-box",
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                WebkitLineClamp: 1,
+                textOverflow: "ellipsis",
+              }}
+            >
+              Nayanajith Bandara
+            </Typography>
+            <IconButton
+              area-aria-describedby={profileId}
+              onClick={(event) => handlePopoverOpen(1, event)}
+              sx={{
+                "&:hover": {
+                  background: "transparent",
+                },
+                "& .MuiTouchRipple-root": {
+                  display: "none",
+                },
+              }}
+            >
+              <ExpandMoreIcon sx={{ color: "white" }} />
+            </IconButton>
+            <Popover
+              id={profileId}
+              open={openProfile}
+              anchorEl={anchorElProfile}
+              onClose={() => handlePopoverClose(1)}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+            >
+              <List>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={() => {
+                      handlePopoverClose(1);
+                      handleMenuSelection(8);
+                    }}
+                  >
+                    <ListItemIcon>
+                      <PersonIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="View Profile" />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton onClick={logout}>
+                    <ListItemIcon>
+                      <LogoutIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Logout" />
+                  </ListItemButton>
+                </ListItem>
+              </List>
+            </Popover>
           </Box>
         </Toolbar>
       </AppBar>
@@ -233,7 +380,7 @@ export default function NavigationDrawer() {
         <DrawerHeader>
           <Box sx={{ display: "flex" }}>
             <img
-              src="logo192.png"
+              src="../../logo192.png"
               alt="Logo"
               style={{ width: "40px", height: "40px", marginRight: "10px" }}
             />

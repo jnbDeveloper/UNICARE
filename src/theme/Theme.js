@@ -1,85 +1,90 @@
-import { createTheme, colors } from "@mui/material";
+import { createTheme } from "@mui/material";
 
-export const lightTheme = createTheme({
-  palette: {
-    mode: "dark",
-    primary: {
-      main: "#0f7029",
-      light: "#128731",
-      dark: "#0a4d1c",
+export default function getUnicareTheme({ mode }) {
+  const unicareTheme = createTheme({
+    palette: {
+      mode: mode,
+      primary: {
+        lighter: "#C8FAD6",
+        light: "#5BE49B",
+        main: "#11844F",
+        dark: "#007867",
+        darker: "#004B50",
+      },
+      secondary: {
+        main: "#6fd546",
+        light: "#81f752",
+        dark: "#58a838",
+      },
     },
-    secondary: {
-      main: "#6fd546",
-      light: "#81f752",
-      dark: "#58a838",
-    },
-  },
-  containers: {
-    background: "#ffffff",
-    onBackground: "#fafafa",
-    surface: "#f5f5f5",
-    onSurface: "#f0f0f0",
-  },
-  textfield: {
-    background: "#f5f5f5",
-    color: "#666666",
-  },
-  button: {
-    background: "#2d3136",
-    color: "#f5f5f5",
-  },
-  components: {
-    MuiInput: {
-      styleOverrides: {
-        root: {
-          fontSize: "14px",
-          color: (theme) => theme.palette.text.secondary,
+    components: {
+      MuiInput: {
+        styleOverrides: {
+          root: {
+            fontSize: "14px",
+            color: (theme) => theme.palette.text.secondary,
+          },
+        },
+      },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            fontSize: "14px",
+            color: (theme) => theme.palette.text.secondary,
+          },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            color: "rgba(130, 130, 130, 0.5)",
+            fontSize: "14px",
+          },
+        },
+      },
+      MuiCardContent: {
+        styleOverrides: {
+          root: {
+            paddingBottom: "16px !important",
+          },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            boxShadow: "5px 5px 20px 5px rgba(0, 0, 0, 0.08)",
+          },
+        },
+      },
+      MuiDialogContentText: {
+        styleOverrides: {
+          root: {
+            fontSize: "14px",
+          },
+        },
+      },
+      MuiCardHeader: {
+        styleOverrides: {
+          title: {
+            fontSize: "18px",
+          },
+          subheader: {
+            fontSize: "12px",
+          },
+        },
+      },
+      MuiSelect: {
+        styleOverrides: {
+          root: {
+            fontSize: "14px",
+            color: (theme) => theme.palette.text.secondary,
+          },
         },
       },
     },
-    MuiOutlinedInput: {
-      styleOverrides: {
-        root: {
-          fontSize: "14px",
-          color: (theme) => theme.palette.text.secondary,
-        },
-      },
-    },
-    MuiInputLabel: {
-      styleOverrides: {
-        root: {
-          color: "rgba(130, 130, 130, 0.5)",
-          fontSize: "14px",
-        },
-      },
-    },
-  },
-  link: "#198aff",
-  selectedMenu: "rgba(15, 112, 41, 0.1)",
-});
+    link: "#198AFF",
+    selectedMenu: "rgba(15, 112, 41, 0.1)",
+  });
 
-export const darkTheme = createTheme({
-  palette: {
-    primary: {
-      main: "#222222",
-      light: "#aaaaaa",
-      dark: "#aaaaaa",
-    },
-    secondary: {
-      main: colors.amber["300"],
-    },
-    text: {
-      primary: "#333333",
-      secondary: "#777777",
-    },
-  },
-  textfield: {
-    background: "#373c42",
-    color: "#999999",
-  },
-  button: {
-    background: "#2d3136",
-    color: "#999999",
-  },
-  link: "#add8e6",
-});
+  return unicareTheme;
+}

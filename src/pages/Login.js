@@ -9,12 +9,13 @@ import {
   Grid,
   Typography,
   CircularProgress,
-  useTheme,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
   DialogActions,
+  CssBaseline,
+  useTheme,
 } from "@mui/material";
 
 import "@fontsource/cabin/400.css";
@@ -31,6 +32,7 @@ export default function Login() {
 
   const login = () => {
     setCanLogin(false);
+
     const data = {
       username: username,
       password: password,
@@ -38,7 +40,7 @@ export default function Login() {
 
     console.log(data);
 
-    setInterval(() => navigate("/home"), 5000);
+    setInterval(() => navigate("/medical-centre/home"), 5000);
   };
 
   const openForgotPassword = () => {
@@ -51,12 +53,14 @@ export default function Login() {
 
   return (
     <React.Fragment>
+      <CssBaseline />
+
       <Dialog open={openFP} onClose={onCloseForgotPassword}>
         <DialogTitle>Forgot Password</DialogTitle>
         <DialogContent>
-          <DialogContentText fontSize="14px">
+          <DialogContentText>
             If you forgot the password please enter your email address below
-            then click ok. You will recieve OTP with email.
+            then click OK. You will recieve OTP with email.
           </DialogContentText>
           <TextField
             label="Email"
@@ -74,6 +78,7 @@ export default function Login() {
 
       <Grid
         container
+        color={theme.palette.background.paper}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -121,6 +126,7 @@ export default function Login() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 label="Email or username"
+                type="email"
                 size="small"
                 fullWidth
                 variant="outlined"
