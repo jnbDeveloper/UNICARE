@@ -4,18 +4,50 @@ import {
   AccordionDetails,
   Box,
   Grid,
-  MenuItem,
-  TextField,
   Typography,
   Switch,
-  Select,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import { useTheme } from "../../theme/ThemeContext";
+import { useEffect, useState } from "react";
+import { fetch, put } from "../../network/Request";
+import { useStudent } from "./StudentContext";
 
 export default function Settings() {
+  const { noAuth, showAlert } = useStudent();
   const { darkMode, toggleDarkMode } = useTheme();
+
+  const [emergencyNotifications, setEmergencyNotifications] = useState(false);
+
+  const emergencyNotificationsChanged = () => {
+    put(
+      "tabs/students/settings/toggle/emergency-notifications",
+      {},
+      (response) => {
+        showAlert(response.status, response.message);
+        setEmergencyNotifications(response.emergencyNotifications);
+      },
+      (error) => {
+        if (error.status === "no-auth") noAuth();
+        else showAlert(error.status, error.message);
+      }
+    );
+  };
+
+  useEffect(() => {
+    fetch(
+      "tabs/students/settings",
+      {},
+      (response) => {
+        setEmergencyNotifications(response.emergencyNotifications);
+      },
+      (error) => {
+        if (error.status === "no-auth") noAuth();
+        else showAlert(error.status, error.message);
+      }
+    );
+  }, [noAuth, showAlert]);
 
   return (
     <Grid container>
@@ -49,46 +81,11 @@ export default function Settings() {
                 alignItems: "center",
               }}
             >
-              <Typography variant="caption">
-                Appointment notification
-              </Typography>
-              <Switch />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Typography variant="caption">Emergency notification</Typography>
-              <Switch />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Typography variant="caption">Maximum patient warning</Typography>
-              <Box display="flex" columnGap={1} alignItems="center">
-                <Typography variant="caption">More than</Typography>
-                <TextField
-                  placeholder="patients"
-                  type="number"
-                  size="small"
-                  variant="outlined"
-                />
-                <Typography variant="caption">patients in a</Typography>
-                <Select size="small" value="">
-                  <MenuItem value="">time period</MenuItem>
-                  <MenuItem value={0}>day</MenuItem>
-                  <MenuItem value={1}>week</MenuItem>
-                  <MenuItem value={2}>month</MenuItem>
-                </Select>
-                <Switch />
-              </Box>
+              <Typography variant="caption">Emergency notifications</Typography>
+              <Switch
+                checked={emergencyNotifications}
+                onChange={emergencyNotificationsChanged}
+              />
             </Box>
           </AccordionDetails>
         </Accordion>

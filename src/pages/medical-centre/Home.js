@@ -207,7 +207,7 @@ export default function Home({ openCheckPatient = (appointmentId) => {} }) {
       )}
       <Grid item xs={12} md={8}>
         <Card sx={{ height: "100%" }}>
-          <CardHeader title="Patients" subheader="(+42%) than last year" />
+          <CardHeader title="Patients" subheader="In last 5 years" />
           <CardContent>
             <ReactApexCharts
               options={options}
