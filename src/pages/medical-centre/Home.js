@@ -139,7 +139,7 @@ export default function Home({ openCheckPatient = (appointmentId) => {} }) {
         <Card>
           <CardContent>
             <Typography variant="h6">
-              Hi {doctor.firstName}, Good Morning
+              Hi {doctor.firstName}, Good Afternoon
             </Typography>
             <Box display="flex" justifyContent="space-between">
               <Typography>{now}</Typography>

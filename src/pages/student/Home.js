@@ -74,7 +74,7 @@ export default function Home() {
         <Card>
           <CardContent>
             <Typography variant="h6">
-              Hi {student.firstName}, Good Morning
+              Hi {student.firstName}, Good Afternoon
             </Typography>
             <Box display="flex" justifyContent="space-between">
               <Typography>{now}</Typography>
