@@ -52,7 +52,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 
 import "@fontsource/cabin/600.css";
 
-import { fetch } from "../../network/Request";
+import { fetch, post } from "../../network/Request";
 import { StudentProvider } from "./StudentContext";
 import NotificationCard from "../../components/NotificationCard";
 import Home from "./Home";
@@ -62,6 +62,8 @@ import Appointments from "./Appointments";
 import Settings from "./Settings";
 
 import Logo from "../../assets/images/Logo.png";
+import HealthRecords from "./HealthRecords";
+import NoNotifications from "../../assets/images/NoNotifications.svg";
 
 const drawerWidth = 240;
 const menu = [
@@ -116,7 +118,10 @@ const Main = styled("main", {
   scrollbarWidth: "thin",
   position: "relative",
   "&::-webkit-scrollbar": {
-    width: "5px",
+    width: "50px",
+  },
+  "&::-webkit-scrollbar-track": {
+    background: "none",
   },
   "&::-webkit-scrollbar-thumb": {
     backgroundColor: "transparent",
@@ -171,6 +176,7 @@ export default function SNavigationDrawer() {
     bloodGroup: "",
     diseases: "",
   });
+  const [notifications, setNotifications] = useState([]);
 
   // #region snackbar
 
@@ -286,6 +292,9 @@ export default function SNavigationDrawer() {
       case 1:
         setContent(<Appointments />);
         break;
+      case 2:
+        setContent(<HealthRecords />);
+        break;
       case 3:
         setContent(<Emergency />);
         break;
@@ -320,12 +329,13 @@ export default function SNavigationDrawer() {
     navigate("/students/login");
   };
 
-  useEffect(() => {
+  const loadData = useCallback(() => {
     fetch(
-      "students/current",
+      "tabs/students",
       {},
       (response) => {
         setStudent(response.student);
+        setNotifications(response.notifications);
       },
       (error) => {
         if (error.status === "no-auth") {
@@ -337,6 +347,10 @@ export default function SNavigationDrawer() {
     );
   }, [noAuth, showAlert]);
 
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
   useLayoutEffect(() => {
     function updateSize() {
       setDrawerOverlay(window.innerWidth <= 600);
@@ -344,6 +358,49 @@ export default function SNavigationDrawer() {
     window.addEventListener("resize", updateSize);
     return () => window.removeEventListener("resize", updateSize);
   }, []);
+
+  const notificationClicked = (type) => {
+    if (type === "emergency") {
+      handleMenuSelection(3);
+    }
+    handlePopoverClose(0);
+  };
+
+  const deleteNotifications = () => {
+    post(
+      "tabs/students/notifications",
+      {},
+      (response) => {
+        showAlert(response.status, response.message);
+        setNotifications([]);
+      },
+      (error) => {
+        if (error.status === "no-auth") noAuth();
+        else showAlert(error.status, error.message);
+      }
+    );
+  };
+
+  useEffect(() => {
+    const channel = new BroadcastChannel("fcm-channel");
+
+    const handleMessage = (event) => {
+      console.log("Received message from service worker:", event.data);
+      const data = event.data.data;
+
+      if (data.task === "emergency" || data.task === "online") {
+        loadData();
+        showAlert("info", event.data.notification.title);
+      }
+    };
+
+    channel.addEventListener("message", handleMessage);
+
+    return () => {
+      channel.removeEventListener("message", handleMessage);
+      channel.close();
+    };
+  }, [loadData, showAlert]);
 
   return (
     <React.Fragment>
@@ -416,7 +473,7 @@ export default function SNavigationDrawer() {
             >
               <IconButton onClick={(event) => handlePopoverOpen(0, event)}>
                 <Tooltip title="Notifications" placement="bottom">
-                  <Badge badgeContent={4} color="secondary">
+                  <Badge badgeContent={notifications.length} color="secondary">
                     <NotificationsIcon sx={{ color: "white" }} />
                   </Badge>
                 </Tooltip>
@@ -434,31 +491,73 @@ export default function SNavigationDrawer() {
                   horizontal: "right",
                 }}
               >
-                <List>
-                  <ListItem disablePadding>
-                    <NotificationCard />
-                  </ListItem>
-                  <Divider />
-                  <ListItem disablePadding>
-                    <NotificationCard />
-                  </ListItem>
-                </List>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  ml={1}
-                  mb={1}
-                  mr={1}
+                <List
+                  sx={{
+                    maxHeight: "300px",
+                    scrollbarWidth: "thin",
+                    "&::-webkit-scrollbar": {
+                      width: "5px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: "transparent",
+                      transition: "background-color 0.3s ease",
+                    },
+                    "&:hover::-webkit-scrollbar-thumb": {
+                      backgroundColor: "rgba(128, 128, 128, 0.5)",
+                    },
+                  }}
                 >
-                  <Button variant="text">View All</Button>
-                  <IconButton>
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
-                <Typography sx={{ p: 2 }} display="none">
-                  No new notifications
-                </Typography>
+                  {notifications.map((notification, index) => {
+                    if (index === notifications.length - 1) {
+                      return (
+                        <ListItem key={index} disablePadding>
+                          <NotificationCard
+                            data={notification}
+                            onClicked={notificationClicked}
+                          />
+                        </ListItem>
+                      );
+                    } else {
+                      return (
+                        <Box key={index}>
+                          <ListItem key={index} disablePadding>
+                            <NotificationCard
+                              data={notification}
+                              onClicked={notificationClicked}
+                            />
+                          </ListItem>
+                          <Divider />
+                        </Box>
+                      );
+                    }
+                  })}
+                  {notifications.length === 0 && (
+                    <ListItem disablePadding>
+                      <img
+                        src={NoNotifications}
+                        alt="No notifications"
+                        style={{ width: "250px" }}
+                      />
+                    </ListItem>
+                  )}
+                </List>
+                {notifications.length > 0 && (
+                  <Box
+                    display="flex"
+                    justifyContent="end"
+                    alignItems="center"
+                    ml={1}
+                    mb={1}
+                    mr={1}
+                  >
+                    <IconButton onClick={deleteNotifications}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                )}
+                {notifications.length === 0 && (
+                  <Typography sx={{ p: 2 }}>No new notifications</Typography>
+                )}
               </Popover>
 
               <Avatar sx={{ ml: 1 }} src={student.image} />

@@ -579,6 +579,7 @@ export default function DoctorProfile() {
                       <Grid item xs={12}>
                         <InputLabel>Bio *</InputLabel>
                         <TextField
+                          name="bio"
                           size="small"
                           placeholder="Bio"
                           multiline

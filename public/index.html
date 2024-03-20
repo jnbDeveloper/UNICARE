@@ -32,6 +32,18 @@
         margin: 0;
         padding: 0;
       }
+      *::-webkit-scrollbar {
+        width: "12px";
+      }
+      *::-webkit-scrollbar-track {
+        background: "none";
+      }
+      *::-webkit-scrollbar-thumb {
+        background: "red";
+      }
+      *::-webkit-scrollbar-thumb:hover {
+        background: "#555";
+      }
     </style>
   </head>
   <body>
@@ -47,5 +59,10 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+      integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8="
+      crossorigin="anonymous"
+    ></script>
   </body>
 </html>

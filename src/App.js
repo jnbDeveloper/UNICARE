@@ -1,16 +1,16 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./theme/ThemeContext";
-import DoctorLogin from "./pages/medical-centre/DoctorLogin";
-import StudentLogin from "./pages/student/StudentLogin";
-import Signup from "./pages/student/Signup";
-import MNavigationDrawer from "./pages/medical-centre/MNavigationDrawer";
-import SNavigationDrawer from "./pages/student/SNavigationDrawer";
 import { firebaseConfig } from "./config/Config";
 import { initializeApp } from "firebase/app";
 import { getMessaging, onMessage, getToken } from "firebase/messaging";
 import { put } from "./network/Request";
 import Landing from "./pages/Landing";
+import DoctorLogin from "./pages/medical-centre/DoctorLogin";
+import StudentLogin from "./pages/student/StudentLogin";
+import Signup from "./pages/student/Signup";
+import MNavigationDrawer from "./pages/medical-centre/MNavigationDrawer";
+import SNavigationDrawer from "./pages/student/SNavigationDrawer";
 
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);

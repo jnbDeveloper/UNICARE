@@ -1,91 +1,26 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Button,
-  Card,
-  CardHeader,
-  CardContent,
-  Grid,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider, DateCalendar } from "@mui/x-date-pickers";
-import ReactApexCharts from "react-apexcharts";
 
 import "@fontsource/cabin/400.css";
 import "@fontsource/cabin/600.css";
-
-import AppointmentCard from "../../components/AppointmentCard";
 import { useStudent } from "./StudentContext";
 
-const series = [
-  {
-    name: "Faculty of Science",
-    data: [31, 40, 28, 51, 42, 109, 100],
-  },
-  {
-    name: "Faculty of Technology",
-    data: [11, 32, 45, 32, 34, 52, 41],
-  },
-  {
-    name: "Faculty of Commerce",
-    data: [5, 50, 21, 17, 47, 20, 10],
-  },
-];
+import Doctor from "../../assets/images/Doctor.svg";
+
+import { fetch } from "../../network/Request";
 
 export default function Home() {
-  const theme = useTheme();
-  const { student } = useStudent();
+  const { noAuth, showAlert, student } = useStudent();
 
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [now, setNow] = useState(dayjs().format("HH:mm:ss A"));
+  const [doctorOnline, setDoctorOnline] = useState(false);
 
   const handleDateChange = (newDate) => {
     setSelectedDate(newDate);
-  };
-
-  const options = {
-    chart: {
-      height: 350,
-      type: "area",
-      background: "rgba(0, 0, 0, 0)",
-      toolbar: {
-        show: false,
-      },
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    stroke: {
-      curve: "smooth",
-      width: 1,
-    },
-    xaxis: {
-      type: "year",
-      categories: ["2016", "2017", "2018", "2019", "2020", "2021", "2022"],
-    },
-    tooltip: {
-      x: {
-        format: "yyyy",
-      },
-    },
-    legend: {
-      position: "top",
-      horizontalAlign: "right",
-      markers: {
-        width: 12,
-        height: 12,
-        radius: 6,
-        offsetX: 0,
-        offsetY: 1,
-        strokeWidth: 0,
-      },
-    },
-    theme: {
-      mode: theme.palette.mode,
-    },
   };
 
   useEffect(() => {
@@ -97,13 +32,49 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    fetch(
+      "tabs/students/home",
+      {},
+      (response) => {
+        if (response.doctor) {
+          setDoctorOnline(response.doctor.online);
+        }
+      },
+      (error) => {
+        if (error.status === "no-auth") noAuth();
+        else showAlert(error.status, error.message);
+      }
+    );
+  }, [noAuth, showAlert]);
+
+  useEffect(() => {
+    const channel = new BroadcastChannel("fcm-channel");
+
+    const handleMessage = (event) => {
+      console.log("Received message from service worker:", event.data);
+      const data = event.data.data;
+
+      if (data.task === "online") {
+        setDoctorOnline(data.online === "true");
+      }
+    };
+
+    channel.addEventListener("message", handleMessage);
+
+    return () => {
+      channel.removeEventListener("message", handleMessage);
+      channel.close();
+    };
+  }, []);
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
         <Card>
           <CardContent>
             <Typography variant="h6">
-              Hi {student.firstName}, Good Morning
+              Hi {student.firstName}, Good Afternoon
             </Typography>
             <Box display="flex" justifyContent="space-between">
               <Typography>{now}</Typography>
@@ -112,21 +83,27 @@ export default function Home() {
           </CardContent>
         </Card>
       </Grid>
-      <Grid item xs={12} md={8}>
+      <Grid item xs={12}>
         <Card>
-          <CardHeader title="Patients" subheader="(+42%) than last year" />
-          <CardContent>
-            <ReactApexCharts
-              options={options}
-              series={series}
-              type="area"
-              height={262}
-            />
+          <CardContent
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Typography color={doctorOnline ? "green" : "red"}>
+              {doctorOnline ? "Doctor is available" : "Doctor is not available"}
+            </Typography>
+            {doctorOnline && (
+              <img src={Doctor} alt="Doctor" style={{ height: "100px" }} />
+            )}
           </CardContent>
         </Card>
       </Grid>
-      <Grid item xs={12} md={4}>
-        <Card sx={{ height: "100%" }}>
+      <Grid item xs={12} md={12}>
+        <Card>
           <CardContent
             sx={{
               overflowX: "auto",

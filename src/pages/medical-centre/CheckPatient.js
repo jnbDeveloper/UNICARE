@@ -699,7 +699,7 @@ export default function CheckPatient({ appointmentId = null }) {
           m={3}
         >
           {healthRecords.map((record, index) => (
-            <RecordCard dp={doctor.image} data={record} />
+            <RecordCard key={index} dp={doctor.image} data={record} />
           ))}
         </Box>
       </Dialog>

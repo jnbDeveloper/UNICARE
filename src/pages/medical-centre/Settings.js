@@ -9,13 +9,10 @@ import {
   CardContent,
   Grid,
   InputLabel,
-  MenuItem,
-  TextField,
   Typography,
   FormHelperText,
   Switch,
   List,
-  Select,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTheme } from "../../theme/ThemeContext";
@@ -50,6 +47,9 @@ export default function Settings() {
   const [slots, setSlots] = useState([]);
   const [slot, setSlot] = useState({ startTime: "", endTime: "" });
   const [errors, setErrors] = useState({ startTime: null, endTime: null });
+  const [appointmentNotifications, setAppointmentNotifications] =
+    useState(false);
+  const [emergencyNotifications, setEmergencyNotifications] = useState(false);
 
   const handleDataChanged = (e) => {
     const { name, value } = e.target;
@@ -120,10 +120,12 @@ export default function Settings() {
 
   const loadData = useCallback(() => {
     fetch(
-      "timeslots",
+      "tabs/doctors/settings",
       {},
       (response) => {
         setSlots(response.slots);
+        setAppointmentNotifications(response.settings.appointmentNotifications);
+        setEmergencyNotifications(response.settings.emergencyNotifications);
       },
       (error) => {
         showAlert(error.status, error.message);
@@ -134,6 +136,36 @@ export default function Settings() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const handleAppointmentNotificationsChanged = () => {
+    put(
+      "tabs/doctors/settings/toggle/appointment-notifications",
+      {},
+      (response) => {
+        setAppointmentNotifications(response.appointmentNotifications);
+        showAlert(response.status, response.message);
+      },
+      (error) => {
+        if (error.status === "no-auth") noAuth();
+        else showAlert(error.status, error.message);
+      }
+    );
+  };
+
+  const handleEmergencyNotificationsChanged = () => {
+    put(
+      "tabs/doctors/settings/toggle/emergency-notifications",
+      {},
+      (response) => {
+        setEmergencyNotifications(response.emergencyNotifications);
+        showAlert(response.status, response.message);
+      },
+      (error) => {
+        if (error.status === "no-auth") noAuth();
+        else showAlert(error.status, error.message);
+      }
+    );
+  };
 
   return (
     <Grid container>
@@ -168,9 +200,12 @@ export default function Settings() {
               }}
             >
               <Typography variant="caption">
-                Appointment notification
+                Appointment notifications
               </Typography>
-              <Switch />
+              <Switch
+                checked={appointmentNotifications}
+                onChange={handleAppointmentNotificationsChanged}
+              />
             </Box>
             <Box
               sx={{
@@ -179,8 +214,11 @@ export default function Settings() {
                 alignItems: "center",
               }}
             >
-              <Typography variant="caption">Emergency notification</Typography>
-              <Switch />
+              <Typography variant="caption">Emergency notifications</Typography>
+              <Switch
+                checked={emergencyNotifications}
+                onChange={handleEmergencyNotificationsChanged}
+              />
             </Box>
           </AccordionDetails>
         </Accordion>
